@@ -12,6 +12,7 @@
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",
     "@google/genai": "^2.30.0",
+    "@supabase/supabase-js": "^2.118.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-router": "^1.170.45",
     "@tanstack/react-router-devtools": "^1.167.2",
