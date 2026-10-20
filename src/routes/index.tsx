@@ -39,7 +39,7 @@ const steps = [
 ]
 
 const included = [
-  '200 recherches par mois',
+  '100 recherches par mois',
   'Des réponses sans pub ni lien sponsorisé',
   'Les sources citées à chaque réponse',
   'Tes recherches ne sont jamais revendues',
