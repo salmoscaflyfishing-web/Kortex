@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState, type FormEvent } from 'react'
+import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
 import { ExternalLink, Loader2, LogOut, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -7,15 +7,28 @@ import { Textarea } from '@/components/ui/textarea'
 import { useSession } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
+const MONTHLY_SEARCHES = 100
+
 export const Route = createFileRoute('/app')({
+  // Page réservée aux clients connectés (doc officielle TanStack Router : authenticated routes)
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getSession()
+    if (!data.session) throw redirect({ to: '/connexion' })
+  },
   component: AppPage,
 })
+
+// Mois en cours à Paris, au format AAAA-MM, comme le compteur dans Supabase
+function currentParisMonth() {
+  return new Intl.DateTimeFormat('fr-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit' }).format(new Date())
+}
 
 type SearchResult = {
   headline: string
   points: string[]
   sources: { title: string; url: string }[]
   searchSuggestions?: string
+  remaining: number
 }
 
 function AppPage() {
@@ -25,6 +38,20 @@ function AppPage() {
   const [result, setResult] = useState<SearchResult | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [remaining, setRemaining] = useState<number | null>(null)
+
+  // Recherches restantes ce mois-ci, lues dans le profil du client
+  useEffect(() => {
+    supabase
+      .from('profiles')
+      .select('searches_used, period_start')
+      .single()
+      .then(({ data }) => {
+        if (!data) return
+        const sameMonth = data.period_start.startsWith(currentParisMonth())
+        setRemaining(sameMonth ? Math.max(0, MONTHLY_SEARCHES - data.searches_used) : MONTHLY_SEARCHES)
+      })
+  }, [])
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -33,12 +60,21 @@ function AppPage() {
     setError('')
     setResult(null)
     try {
+      const { data: auth } = await supabase.auth.getSession()
       const response = await fetch('/api/search', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${auth.session?.access_token ?? ''}`,
+        },
         body: JSON.stringify({ question }),
       })
       const data = await response.json()
+      if (typeof data.remaining === 'number') setRemaining(data.remaining)
+      if (response.status === 401) {
+        navigate({ to: '/connexion' })
+        return
+      }
       if (!response.ok) throw new Error(data.error ?? 'Une erreur est survenue.')
       setResult(data)
     } catch (err) {
@@ -94,6 +130,11 @@ function AppPage() {
             {loading ? <Loader2 className="animate-spin" aria-hidden /> : <Search aria-hidden />}
             {loading ? 'Kortex cherche…' : 'Chercher'}
           </Button>
+          {remaining !== null && (
+            <p className="text-sm text-muted-foreground">
+              {remaining} recherche{remaining > 1 ? 's' : ''} restante{remaining > 1 ? 's' : ''} ce mois-ci
+            </p>
+          )}
         </form>
 
         {error && (
