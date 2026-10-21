@@ -9,7 +9,7 @@ const MAX_QUESTION_LENGTH = 300
 const MONTHLY_SEARCHES = 100
 const LIMIT_MESSAGE = 'Tu as utilisé tes 100 recherches ce mois-ci. Le compteur repart à zéro le 1er du mois.'
 
-const SYSTEM_INSTRUCTION = `Tu es Kortex, un moteur de recherche pour le public français.
+const SYSTEM_INSTRUCTION = `Tu es Klarnet, un moteur de recherche pour le public français.
 Réponds toujours en français simple, comme à un ami, avec des phrases courtes.
 
 Format strict, en texte brut, sans markdown ni gras :
