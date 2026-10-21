@@ -70,7 +70,7 @@ export default {
       return json({ error: `Ta question doit faire entre 3 et ${MAX_QUESTION_LENGTH} caractères.` }, 400)
     }
 
-    // Le client doit être connecté et avoir des recherches restantes ce mois-ci.
+    // Le client doit être connecté, abonné, et avoir des recherches restantes ce mois-ci.
     // Client Supabase « au nom du client », comme dans la doc officielle Supabase.
     const authorization = request.headers.get('authorization')
     const supabaseUrl = process.env.VITE_SUPABASE_URL
@@ -87,11 +87,14 @@ export default {
     })
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('searches_used, period_start')
+      .select('searches_used, period_start, subscription_status')
       .single()
     if (profileError) {
       console.error('Erreur profil :', profileError.message)
       return json({ error: 'Ta session a expiré. Reconnecte-toi.' }, 401)
+    }
+    if (profile.subscription_status !== 'active') {
+      return json({ error: 'Abonne-toi pour faire des recherches.' }, 402)
     }
     const newMonth = !profile.period_start.startsWith(currentParisMonth())
     if (!newMonth && profile.searches_used >= MONTHLY_SEARCHES) {
