@@ -9,18 +9,25 @@ function apiDev(): Plugin {
   return {
     name: 'kortex-api-dev',
     configureServer(server) {
-      server.middlewares.use('/api/search', async (req, res) => {
+      server.middlewares.use('/api', async (req, res) => {
         const chunks: Buffer[] = []
         for await (const chunk of req) chunks.push(chunk as Buffer)
-        const request = new Request('http://localhost/api/search', {
+        const name = (req.url ?? '').split('?')[0].replace(/^\//, '')
+        if (!['search', 'checkout', 'portal', 'webhook'].includes(name)) {
+          res.statusCode = 404
+          res.end()
+          return
+        }
+        const headers = new Headers()
+        for (const [key, value] of Object.entries(req.headers)) {
+          if (typeof value === 'string') headers.set(key, value)
+        }
+        const request = new Request(`http://${req.headers.host}/api/${name}`, {
           method: req.method,
-          headers: {
-            'content-type': req.headers['content-type'] ?? '',
-            authorization: req.headers.authorization ?? '',
-          },
+          headers,
           body: req.method === 'POST' ? Buffer.concat(chunks) : undefined,
         })
-        const mod = await server.ssrLoadModule('/api/search.ts')
+        const mod = await server.ssrLoadModule(`/api/${name}.ts`)
         const response: Response = await mod.default.fetch(request)
         res.statusCode = response.status
         response.headers.forEach((value, key) => res.setHeader(key, value))
@@ -34,7 +41,14 @@ function apiDev(): Plugin {
 export default defineConfig(({ mode }) => {
   // Charge les clés secrètes de .env.local pour le serveur uniquement (jamais pour le navigateur)
   const env = loadEnv(mode, process.cwd(), '')
-  for (const name of ['GEMINI_API_KEY', 'VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY']) {
+  for (const name of [
+    'GEMINI_API_KEY',
+    'VITE_SUPABASE_URL',
+    'VITE_SUPABASE_PUBLISHABLE_KEY',
+    'SUPABASE_SECRET_KEY',
+    'STRIPE_API_KEY',
+    'STRIPE_WEBHOOK_SECRET',
+  ]) {
     if (env[name]) process.env[name] = env[name]
   }
 
