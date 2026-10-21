@@ -1,5 +1,5 @@
 import type Stripe from 'stripe'
-import { getStripe, getSupabaseAdmin, json } from '../server/kortex.js'
+import { getStripe, getSupabaseAdmin, json, sendWelcomeEmail } from '../server/kortex.js'
 
 // Reçoit les messages de Stripe et met à jour l'abonnement du client dans Supabase.
 // Basé sur la doc Stripe « Receive Stripe events in your webhook endpoint »
@@ -56,6 +56,13 @@ export default {
       return json({ received: true })
     }
 
+    // État avant la mise à jour, pour savoir si l'abonnement vient de devenir actif
+    const { data: before } = await supabase
+      .from('profiles')
+      .select('subscription_status, stripe_subscription_id')
+      .eq('id', userId)
+      .maybeSingle()
+
     let update = supabase
       .from('profiles')
       .update({
@@ -73,6 +80,18 @@ export default {
       // Réponse en erreur : Stripe renverra le message plus tard
       console.error('Webhook : mise à jour Supabase impossible.', error.message)
       return json({ error: 'Mise à jour impossible.' }, 500)
+    }
+
+    // Email de bienvenue : seulement quand l'abonnement passe à « active ».
+    // Un échec d'envoi ne bloque pas l'abonnement : on le note seulement.
+    const wasActive = before?.subscription_status === 'active' && before.stripe_subscription_id === subscription.id
+    if (subscription.status === 'active' && !wasActive) {
+      const { data } = await supabase.auth.admin.getUserById(userId)
+      const email = data.user?.email
+      const result = email
+        ? await sendWelcomeEmail(email, subscription.id, `${new URL(request.url).origin}/app`)
+        : { error: 'compte sans email' }
+      if (result.error) console.error('Webhook : email de bienvenue non envoyé.', result.error)
     }
 
     return json({ received: true })
