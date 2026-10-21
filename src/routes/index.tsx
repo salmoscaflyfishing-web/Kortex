@@ -73,9 +73,14 @@ function HomePage() {
           <Link to="/" className="text-lg font-semibold tracking-tight">
             Kortex
           </Link>
-          <Button asChild>
-            <a href="#prix">Commencer</a>
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button asChild variant="ghost">
+              <Link to="/connexion">Connexion</Link>
+            </Button>
+            <Button asChild>
+              <a href="#prix">Commencer</a>
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -144,8 +149,8 @@ function HomePage() {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button size="lg" className="h-12 w-full text-base">
-                  Commencer
+                <Button asChild size="lg" className="h-12 w-full text-base">
+                  <Link to="/inscription">Commencer</Link>
                 </Button>
               </CardFooter>
             </Card>
