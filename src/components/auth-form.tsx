@@ -51,7 +51,7 @@ export function AuthForm({ mode }: { mode: 'inscription' | 'connexion' }) {
       <header className="border-b">
         <div className="mx-auto flex h-14 max-w-3xl items-center px-4">
           <Link to="/" className="text-lg font-semibold tracking-tight">
-            Kortex
+            Klarnet
           </Link>
         </div>
       </header>
