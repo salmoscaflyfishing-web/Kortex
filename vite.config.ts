@@ -14,7 +14,10 @@ function apiDev(): Plugin {
         for await (const chunk of req) chunks.push(chunk as Buffer)
         const request = new Request('http://localhost/api/search', {
           method: req.method,
-          headers: { 'content-type': req.headers['content-type'] ?? '' },
+          headers: {
+            'content-type': req.headers['content-type'] ?? '',
+            authorization: req.headers.authorization ?? '',
+          },
           body: req.method === 'POST' ? Buffer.concat(chunks) : undefined,
         })
         const mod = await server.ssrLoadModule('/api/search.ts')
@@ -31,7 +34,9 @@ function apiDev(): Plugin {
 export default defineConfig(({ mode }) => {
   // Charge les clés secrètes de .env.local pour le serveur uniquement (jamais pour le navigateur)
   const env = loadEnv(mode, process.cwd(), '')
-  if (env.GEMINI_API_KEY) process.env.GEMINI_API_KEY = env.GEMINI_API_KEY
+  for (const name of ['GEMINI_API_KEY', 'VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY']) {
+    if (env[name]) process.env[name] = env[name]
+  }
 
   return {
     plugins: [
