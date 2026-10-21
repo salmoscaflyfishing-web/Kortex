@@ -28,7 +28,7 @@ const steps = [
   },
   {
     icon: Filter,
-    title: 'Kortex fait le tri.',
+    title: 'Klarnet fait le tri.',
     text: 'Il cherche sur le web et met de côté la pub et les pages sponsorisées.',
   },
   {
@@ -48,12 +48,12 @@ const included = [
 
 const faq = [
   {
-    q: 'Kortex, c’est quoi ?',
+    q: 'Klarnet, c’est quoi ?',
     a: 'Un moteur de recherche qui te répond par un texte clair au lieu d’une liste de liens remplie de pub.',
   },
   {
     q: 'Pourquoi c’est payant ?',
-    a: 'Un moteur gratuit gagne son argent avec la pub. Avec Kortex, c’est ton abonnement qui paie le service : on n’a donc aucune raison de te montrer de la pub.',
+    a: 'Un moteur gratuit gagne son argent avec la pub. Avec Klarnet, c’est ton abonnement qui paie le service : on n’a donc aucune raison de te montrer de la pub.',
   },
   {
     q: 'Mes recherches restent-elles privées ?',
@@ -71,7 +71,7 @@ function HomePage() {
       <header className="sticky top-0 z-10 border-b bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           <Link to="/" className="text-lg font-semibold tracking-tight">
-            Kortex
+            Klarnet
           </Link>
           <div className="flex items-center gap-1">
             <Button asChild variant="ghost">
@@ -91,7 +91,7 @@ function HomePage() {
             <span className="text-primary">sans pub.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-lg text-pretty text-muted-foreground">
-            Kortex est un moteur de recherche privé, pensé pour la France. Il
+            Klarnet est un moteur de recherche privé, pensé pour la France. Il
             lit les pages à ta place, écarte la pub et les résultats
             sponsorisés, et te donne une réponse simple, avec ses sources.
           </p>
@@ -132,7 +132,7 @@ function HomePage() {
             </h2>
             <Card className="mx-auto mt-10 max-w-md ring-2 ring-primary">
               <CardHeader>
-                <CardTitle className="text-xl">Kortex</CardTitle>
+                <CardTitle className="text-xl">Klarnet</CardTitle>
                 <p className="mt-2">
                   <span className="text-4xl font-semibold tracking-tight">7,99 €</span>
                   <span className="text-muted-foreground"> par mois</span>
@@ -178,7 +178,7 @@ function HomePage() {
 
       <footer className="border-t">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:justify-between">
-          <p>© 2026 Kortex</p>
+          <p>© 2026 Klarnet</p>
           <nav className="flex gap-6">
             <Link to="/mentions-legales" className="hover:text-foreground">
               Mentions légales
