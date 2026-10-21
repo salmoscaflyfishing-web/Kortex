@@ -1,19 +1,21 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-router'
-import { ExternalLink, Loader2, LogOut, Search } from 'lucide-react'
+import { CreditCard, ExternalLink, Loader2, LogOut, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { useSession } from '@/lib/auth'
+import { getSubscriptionStatus, openStripePage } from '@/lib/billing'
 import { supabase } from '@/lib/supabase'
 
 const MONTHLY_SEARCHES = 100
 
 export const Route = createFileRoute('/app')({
-  // Page réservée aux clients connectés (doc officielle TanStack Router : authenticated routes)
+  // Page réservée aux abonnés actifs (doc officielle TanStack Router : authenticated routes)
   beforeLoad: async () => {
     const { data } = await supabase.auth.getSession()
     if (!data.session) throw redirect({ to: '/connexion' })
+    if ((await getSubscriptionStatus()) !== 'active') throw redirect({ to: '/abonnement' })
   },
   component: AppPage,
 })
@@ -75,12 +77,25 @@ function AppPage() {
         navigate({ to: '/connexion' })
         return
       }
+      if (response.status === 402) {
+        navigate({ to: '/abonnement' })
+        return
+      }
       if (!response.ok) throw new Error(data.error ?? 'Une erreur est survenue.')
       setResult(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleManageSubscription() {
+    setError('')
+    try {
+      await openStripePage('/api/portal')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.')
     }
   }
 
@@ -98,10 +113,16 @@ function AppPage() {
             Kortex
           </Link>
           {session && (
-            <Button variant="ghost" onClick={handleSignOut}>
-              <LogOut aria-hidden />
-              Se déconnecter
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" onClick={handleManageSubscription} aria-label="Mon abonnement">
+                <CreditCard aria-hidden />
+                <span className="hidden sm:inline">Mon abonnement</span>
+              </Button>
+              <Button variant="ghost" onClick={handleSignOut}>
+                <LogOut aria-hidden />
+                Se déconnecter
+              </Button>
+            </div>
           )}
         </div>
       </header>
