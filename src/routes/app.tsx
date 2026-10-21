@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { ExternalLink, Loader2, Search } from 'lucide-react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { ExternalLink, Loader2, LogOut, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
+import { useSession } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 
 export const Route = createFileRoute('/app')({
   component: AppPage,
@@ -17,6 +19,8 @@ type SearchResult = {
 }
 
 function AppPage() {
+  const navigate = useNavigate()
+  const session = useSession()
   const [question, setQuestion] = useState('')
   const [result, setResult] = useState<SearchResult | null>(null)
   const [error, setError] = useState('')
@@ -44,13 +48,25 @@ function AppPage() {
     }
   }
 
+  async function handleSignOut() {
+    // Déconnexion, tirée de la doc officielle Supabase (guides/auth/signout)
+    await supabase.auth.signOut()
+    navigate({ to: '/' })
+  }
+
   return (
     <div className="flex min-h-svh flex-col">
       <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-3xl items-center px-4">
+        <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-3 px-4">
           <Link to="/" className="text-lg font-semibold tracking-tight">
             Kortex
           </Link>
+          {session && (
+            <Button variant="ghost" onClick={handleSignOut}>
+              <LogOut aria-hidden />
+              Se déconnecter
+            </Button>
+          )}
         </div>
       </header>
 
