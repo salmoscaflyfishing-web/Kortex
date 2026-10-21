@@ -110,7 +110,7 @@ function AppPage() {
       <header className="border-b">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-3 px-4">
           <Link to="/" className="text-lg font-semibold tracking-tight">
-            Kortex
+            Klarnet
           </Link>
           {session && (
             <div className="flex items-center gap-1">
@@ -149,7 +149,7 @@ function AppPage() {
           />
           <Button type="submit" size="lg" className="h-12 w-full text-base sm:w-auto" disabled={loading || question.trim().length < 3}>
             {loading ? <Loader2 className="animate-spin" aria-hidden /> : <Search aria-hidden />}
-            {loading ? 'Kortex cherche…' : 'Chercher'}
+            {loading ? 'Klarnet cherche…' : 'Chercher'}
           </Button>
           {remaining !== null && (
             <p className="text-sm text-muted-foreground">
